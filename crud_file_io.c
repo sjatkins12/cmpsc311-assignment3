@@ -152,6 +152,8 @@ int crudIOUnitTest(void) {
 		logMessage(LOG_ERROR_LEVEL, "CRUD_IO_UNIT_TEST : Failure open operation.");
 		return(-1);
 	}
+	else
+		return (1);
 
 	// Now do a bunch of operations
 	for (i=0; i<CRUD_IO_UNIT_TEST_ITERATIONS; i++) {
@@ -168,7 +170,7 @@ int crudIOUnitTest(void) {
 
 		case CIO_UNIT_TEST_READ: // read a random set of data
 			count = getRandomValue(0, cio_utest_length);
-			logMessage(LOG_INFO_LEVEL, "CRUD_IO_UNIT_TEST : read %d at position %d", bytes, cio_utest_position);
+			logMessage(LOG_INFO_LEVEL, "CRUD_IO_UNIT_TEST : read %d at position %d", count, cio_utest_position);
 			bytes = crud_read(fh, tbuf, count);
 			if (bytes == -1) {
 				logMessage(LOG_ERROR_LEVEL, "CRUD_IO_UNIT_TEST : Read failure.");

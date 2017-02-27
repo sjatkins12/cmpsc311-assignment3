@@ -147,13 +147,17 @@ int crudIOUnitTest(void) {
 	cio_utest_position = 0;
 
 	// Start by opening a file
+	printf("Second\n");
 	fh = crud_open("temp_file.txt");
 	if (fh == -1) {
+		printf("boobs\n");
 		logMessage(LOG_ERROR_LEVEL, "CRUD_IO_UNIT_TEST : Failure open operation.");
 		return(-1);
 	}
-	else
+	else {
+		printf("butts\n");
 		return (1);
+	}
 
 	// Now do a bunch of operations
 	for (i=0; i<CRUD_IO_UNIT_TEST_ITERATIONS; i++) {

@@ -59,7 +59,7 @@ int16_t crud_open(char *path) {
 	// 	path++;
 	// }
 	request <<= 24; //Move to correct position in array 
-	request += CRUD_MAX_OBJECT_SIZE; // MAX BUFFER SIZE
+	request += CIO_UNIT_TEST_MAX_WRITE_SIZE; // To assure one write before resizing
 	request <<= 4; // Add ending zeros for flags & return bit
 	response = crud_bus_request(request, buff);
 	free(buff);
@@ -123,8 +123,6 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 	request <<= 4;
 	response = crud_bus_request(request, buf);
 	tbuf = (char *) buf;
-	//tbuf = buf;
-	//printf("%lu\n", response);
 	if (response & 0x1)
 		return (-1); 
 	response >>= 4;
@@ -158,6 +156,8 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	CrudResponse response;
 	CrudRequest request = fd;
+	char *tbuf;
+	int i = 0;
 	
 	request <<= 4;
 	request += CRUD_UPDATE;
@@ -165,13 +165,30 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	request += CRUD_MAX_OBJECT_SIZE;
 	request <<= 4;
 	response = crud_bus_request(request, buf);
-	if (response & 0x1)
-		return (-1);
+	if (response & 0x1) {
+		request = ((fd << 4) + CRUD_DELETE) << 24;
+		request += CRUD_MAX_OBJECT_SIZE;
+		request <<= 4;
+		response = crud_bus_request(request, buf);
+		response = (response >> 4) & 0xFFFFFF;
+		request = ((fd << 4) + CRUD_CREATE) << 24;
+		request += response;
+		request <<= 4;
+		response = crud_bus_request(request, buf);
+		if (response & 0x1) 
+			return (-1);
+	}
 	response >>= 4;
-	if ((response & 0xFFFFFF) < count)
-		return (response & 0xFFFFFF);
-	else
-		return (count);
+	tbuf = (char *) buf;
+	if (response & 0x1)
+		return (-1); 
+	response >>= 4;
+	while(i < count) {
+		if (!tbuf[i])
+			return (i);
+		i++;
+	}
+	return (i);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -184,6 +201,16 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 // Outputs      : 0 if successful or -1 if failure
 
 int32_t crud_seek(int16_t fd, uint32_t loc) {
+	CrudResponse response;
+	CrudRequest request = fd;
+	void *tbuf;
+
+	tbuf = malloc(CRUD_MAX_OBJECT_SIZE);
+	request = ((request << 4) + CRUD_READ) << 24;
+	request = (request + CRUD_MAX_OBJECT_SIZE) << 4;
+	response = crud_bus_request(request, tbuf);
+	
+
 }
 
 //

@@ -216,8 +216,10 @@ int crudIOUnitTest(void) {
 
 		// Pick a random command
 		if (cio_utest_length == 0) {
+			printf("%s\n", "butts");
 			cmd = CIO_UNIT_TEST_WRITE;
 		} else {
+			printf("%s\n", "nuts");
 			cmd = getRandomValue(CIO_UNIT_TEST_READ, CIO_UNIT_TEST_WRITE);
 		}
 

@@ -311,7 +311,7 @@ int crudIOUnitTest(void) {
 			break;
 
 		}
-	}
+	
 
 #if DEEP_DEBUG
 		// VALIDATION STEP: ENSURE OUR LOCAL IS LIKE OBJECT STORE

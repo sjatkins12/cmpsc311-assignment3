@@ -45,8 +45,8 @@ typedef enum {
 
 int16_t crud_open(char *path) {
 	CrudResponse response;
-	CrudRequest request = CRUD_CREATE;
-	char *buff;
+	CrudRequest request = CRUD_INIT;
+	char buff[CRUD_MAX_OBJECT_SIZE];
 
 	buff = malloc(CRUD_MAX_OBJECT_SIZE);
 	// // Add the path as first data in object
@@ -61,9 +61,10 @@ int16_t crud_open(char *path) {
 	response = crud_bus_request(request, buff);
 	free(buff);
 	if (response & 0x1) //Sucsessfull CRUD Request
-		return (response >> 32); // Return OID as FD
-	else
 		return (-1); // Failure to create new object
+	else
+		return (response >> 32); // Return OID as FD
+
 
 }
 

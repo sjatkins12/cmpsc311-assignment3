@@ -119,7 +119,7 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 	request <<= 4;
 	request += CRUD_READ;
 	request <<= 24;
-	request += CRUD_MAX_OBJECT_SIZE;
+	request += count;
 	request <<= 4;
 	response = crud_bus_request(request, buf);
 	tbuf = buf;

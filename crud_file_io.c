@@ -156,8 +156,10 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	response >>= 4;
 	if ((response & 0xFFFFFF) < count)
 		return (response & 0xFFFFFF);
-	else
+	else {
+		printf("Boobs\n");
 		return (count);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

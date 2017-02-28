@@ -235,20 +235,17 @@ int crudIOUnitTest(void) {
 		switch (cmd) {
 
 		case CIO_UNIT_TEST_READ: // read a random set of data
-			cio_utest_position -= count;
 			count = getRandomValue(0, cio_utest_length);
 			logMessage(LOG_INFO_LEVEL, "CRUD_IO_UNIT_TEST : read %d at position %d", count, cio_utest_position);
-			printf("Count: %d\n", count);
 
 			bytes = crud_read(fh, tbuf, count);
-			printf("Bytes: %d\n", bytes);
 			if (bytes == -1) {
 				logMessage(LOG_ERROR_LEVEL, "CRUD_IO_UNIT_TEST : Read failure.");
 				return(-1);
 			}
 
 			// Compare to what we expected
-			printf("utest_position: %d\nutest_length: %d\n", cio_utest_position, cio_utest_length);
+			// printf("utest_position: %d\nutest_length: %d\n", cio_utest_position, cio_utest_length);
 			if (cio_utest_position+count > cio_utest_length) {
 				expected = cio_utest_length-cio_utest_position;
 			} else {

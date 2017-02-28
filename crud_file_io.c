@@ -129,7 +129,7 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 		return (-1); 
 	response >>= 4;
 	while(i < count) {
-		if (tbuf[i] == 0)
+		if (!tbuf[i])
 			return (i);
 		i++;
 	}

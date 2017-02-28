@@ -101,7 +101,6 @@ int main( int argc, char *argv[] ) {
 	if ( unit_tests ) {
 
 		// Enable verbose, run the tests and check the results
-		printf("First\n");
 		if ( crudIOUnitTest() ) {
 			logMessage( LOG_ERROR_LEVEL, "CRUD unit tests failed.\n\n" );
 		} else {

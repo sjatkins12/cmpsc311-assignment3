@@ -223,7 +223,10 @@ int crudIOUnitTest(void) {
 		case CIO_UNIT_TEST_READ: // read a random set of data
 			count = getRandomValue(0, cio_utest_length);
 			logMessage(LOG_INFO_LEVEL, "CRUD_IO_UNIT_TEST : read %d at position %d", count, cio_utest_position);
+			printf("Count: %d\n", count);
+
 			bytes = crud_read(fh, tbuf, count);
+			printf("Bytes: %d\n", bytes);
 			if (bytes == -1) {
 				logMessage(LOG_ERROR_LEVEL, "CRUD_IO_UNIT_TEST : Read failure.");
 				return(-1);

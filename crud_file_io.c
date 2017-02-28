@@ -156,7 +156,6 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	request += CRUD_MAX_OBJECT_SIZE;
 	request <<= 4;
 	response = crud_bus_request(request, buf);
-	printf("%lu\n", response);
 	if (response & 0x1)
 		return (-1);
 	response >>= 4;
@@ -241,6 +240,7 @@ int crudIOUnitTest(void) {
 			}
 
 			// Compare to what we expected
+			printf("utest_position: %d\nutest_length: %d\n", cio_utest_position, cio_utest_length);
 			if (cio_utest_position+count > cio_utest_length) {
 				expected = cio_utest_length-cio_utest_position;
 			} else {

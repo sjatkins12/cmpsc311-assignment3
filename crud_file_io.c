@@ -114,33 +114,32 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 	CrudResponse response;
 	CrudRequest request = fd;
 	int i = 0;
-	void *tbuf = malloc(count);
+	char *tbuf = (char *) buf;
 	
 	request <<= 4;
 	request += CRUD_READ;
 	request <<= 24;
-	request += count;
+	request += CRUD_MAX_OBJECT_SIZE;
 	request <<= 4;
-	response = crud_bus_request(request, tbuf);
+	response = crud_bus_request(request, buf);
 	//tbuf = buf;
-	printf("%lu\n", response);
+	//printf("%lu\n", response);
 	if (response & 0x1)
 		return (-1); 
 	response >>= 4;
-	printf("Val: %lu\n", (response & 0xFFFFFF));
-	// while(i < count) {
-	// 	if (tbuf == NULL)
-	// 		break ;
-	// 	i++;
-	// 	tbuf++;
-	// }
-	// return (i);
-	if ((response & 0xFFFFFF) < count)
-		return (response & 0xFFFFFF);
-	else {
-		printf("Boobs\n");
-		return (count);
+	while(i < count) {
+		if (*tbuf == 0)
+			break ;
+		i++;
+		tbuf++;
 	}
+	return (i);
+	// if ((response & 0xFFFFFF) < count)
+	// 	return (response & 0xFFFFFF);
+	// else {
+	// 	printf("Boobs\n");
+	// 	return (count);
+	// }
 	
 
 }

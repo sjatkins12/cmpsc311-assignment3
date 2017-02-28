@@ -199,6 +199,7 @@ int crudIOUnitTest(void) {
 	if (fh == -1) {
 		logMessage(LOG_ERROR_LEVEL, "CRUD_IO_UNIT_TEST : Failure open operation.");
 		return(-1);
+	}
 
 	// Now do a bunch of operations
 	for (i=0; i<CRUD_IO_UNIT_TEST_ITERATIONS; i++) {
@@ -310,6 +311,7 @@ int crudIOUnitTest(void) {
 			break;
 
 		}
+	}
 
 #if DEEP_DEBUG
 		// VALIDATION STEP: ENSURE OUR LOCAL IS LIKE OBJECT STORE

@@ -80,6 +80,23 @@ int16_t crud_open(char *path) {
 // Outputs      : 0 if successful, -1 if failure
 
 int16_t crud_close(int16_t fh) {
+	CrudResponse response;
+	CrudRequest request = fh;
+	char *buff;
+
+	buff = malloc(CRUD_MAX_OBJECT_SIZE);
+	request <<= 4;
+	request += CRUD_DELETE;
+	request <<= 24;
+	request += CRUD_MAX_OBJECT_SIZE;
+	request <<= 4;
+	response = crud_bus_request(request, buff);
+	free(buff);
+	if (response & 0x1) {
+		return (-1);
+	}
+	else 
+		return (0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -94,6 +111,20 @@ int16_t crud_close(int16_t fh) {
 // Outputs      : the number of bytes read or -1 if failures
 
 int32_t crud_read(int16_t fd, void *buf, int32_t count) {
+	CrudResponse response;
+	CrudRequest request = fh;
+	
+	request <<= 4;
+	request += CRUD_READ;
+	request <<= 24;
+	request += count;
+	request <<= 4;
+	response = crud_bus_request(request, buf);
+	if (response & 0x1)
+		return (-1);
+	response >>= 4;
+	return (response & 0xFFFFFF);
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -108,6 +139,19 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 // Outputs      : the number of bytes written or -1 if failure
 
 int32_t crud_write(int16_t fd, void *buf, int32_t count) {
+	CrudResponse response;
+	CrudRequest request = fh;
+	
+	request <<= 4;
+	request += CRUD_READ;
+	request <<= 24;
+	request += count;
+	request <<= 4;
+	response = crud_bus_request(request, buf);
+	if (response & 0x1)
+		return (-1);
+	else
+		return (count);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -151,17 +195,10 @@ int crudIOUnitTest(void) {
 	cio_utest_position = 0;
 
 	// Start by opening a file
-	printf("Second\n");
 	fh = crud_open("temp_file.txt");
 	if (fh == -1) {
-		printf("boobs\n");
 		logMessage(LOG_ERROR_LEVEL, "CRUD_IO_UNIT_TEST : Failure open operation.");
 		return(-1);
-	}
-	else {
-		printf("butts\n");
-		return (1);
-	}
 
 	// Now do a bunch of operations
 	for (i=0; i<CRUD_IO_UNIT_TEST_ITERATIONS; i++) {
@@ -170,7 +207,7 @@ int crudIOUnitTest(void) {
 		if (cio_utest_length == 0) {
 			cmd = CIO_UNIT_TEST_WRITE;
 		} else {
-			cmd = getRandomValue(CIO_UNIT_TEST_READ, CIO_UNIT_TEST_SEEK);
+			cmd = getRandomValue(CIO_UNIT_TEST_READ, CIO_UNIT_TEST_WRITE);
 		}
 
 		// Execute the command

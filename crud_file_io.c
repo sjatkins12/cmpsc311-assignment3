@@ -113,11 +113,12 @@ int16_t crud_close(int16_t fh) {
 int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 	CrudResponse response;
 	CrudRequest request = fd;
+	int i = 0;
 	
 	request <<= 4;
 	request += CRUD_READ;
 	request <<= 24;
-	request += count;
+	request += CRUD_MAX_OBJECT_SIZE;
 	request <<= 4;
 	response = crud_bus_request(request, buf);
 	printf("%lu\n", response);
@@ -125,11 +126,14 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 		return (-1);
 	response >>= 4;
 	printf("Val: %lu\n", (response & 0xFFFFFF));
+	while(buf[i] && i < count) {
+		i++;
+	}
 	if ((response & 0xFFFFFF) < count)
 		return (response & 0xFFFFFF);
 	else {
 		printf("Boobs\n");
-		return (count);
+		return (i);
 	}
 	
 
@@ -217,10 +221,8 @@ int crudIOUnitTest(void) {
 
 		// Pick a random command
 		if (cio_utest_length == 0) {
-			printf("%s\n", "butts");
 			cmd = CIO_UNIT_TEST_WRITE;
 		} else {
-			printf("%s\n", "nuts");
 			cmd = getRandomValue(CIO_UNIT_TEST_READ, CIO_UNIT_TEST_WRITE);
 		}
 

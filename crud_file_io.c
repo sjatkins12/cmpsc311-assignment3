@@ -112,7 +112,7 @@ int16_t crud_close(int16_t fh) {
 
 int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 	CrudResponse response;
-	CrudRequest request = fh;
+	CrudRequest request = fd;
 	
 	request <<= 4;
 	request += CRUD_READ;
@@ -140,7 +140,7 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 
 int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	CrudResponse response;
-	CrudRequest request = fh;
+	CrudRequest request = fd;
 	
 	request <<= 4;
 	request += CRUD_READ;

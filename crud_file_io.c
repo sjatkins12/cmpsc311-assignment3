@@ -129,7 +129,7 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 	response >>= 4;
 	printf("Val: %lu\n", (response & 0xFFFFFF));
 	while(i < count) {
-		if (*tbuf == 0x0)
+		if (!tbuf)
 			break ;
 		i++;
 		tbuf++;

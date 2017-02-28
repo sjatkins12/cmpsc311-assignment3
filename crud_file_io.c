@@ -153,7 +153,7 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	request <<= 4;
 	request += CRUD_UPDATE;
 	request <<= 24;
-	request += count;
+	request += CRUD_MAX_OBJECT_SIZE;
 	request <<= 4;
 	response = crud_bus_request(request, buf);
 	if (response & 0x1)

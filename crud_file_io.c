@@ -46,9 +46,12 @@ typedef enum {
 int16_t crud_open(char *path) {
 	CrudResponse response;
 	CrudRequest request = CRUD_INIT;
-	char buff[CRUD_MAX_OBJECT_SIZE];
+	char *buff;
 
 	buff = malloc(CRUD_MAX_OBJECT_SIZE);
+	response = crud_bus_request(request, buff);
+	request = CRUD_CREATE;
+
 	// // Add the path as first data in object
 	// while (path) {
 	// 	buff[i] = *path;

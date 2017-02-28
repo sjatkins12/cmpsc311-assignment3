@@ -151,11 +151,11 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	request += CRUD_MAX_OBJECT_SIZE;
 	request <<= 4;
 	response = crud_bus_request(request, buf);
-	printf("%d\n", response);
+	printf("%lu\n", response);
 	if (response & 0x1)
 		return (-1);
 	response >>= 4;
-	printf("Val: %d\n", (response & 0xFFFFFF));
+	printf("Val: %lu\n", (response & 0xFFFFFF));
 	if ((response & 0xFFFFFF) < count)
 		return (response & 0xFFFFFF);
 	else {

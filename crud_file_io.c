@@ -117,13 +117,16 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 	request <<= 4;
 	request += CRUD_READ;
 	request <<= 24;
-	request += count;
+	request += CRUD_MAX_OBJECT_SIZE;
 	request <<= 4;
 	response = crud_bus_request(request, buf);
 	if (response & 0x1)
 		return (-1);
 	response >>= 4;
-	return (response & 0xFFFFFF);
+	if ((response & 0xFFFFFF) < count)
+		return (response & 0xFFFFFF);
+	else
+		return (count);
 
 }
 
@@ -143,13 +146,16 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	CrudRequest request = fd;
 	
 	request <<= 4;
-	request += CRUD_READ;
+	request += CRUD_UPDATE;
 	request <<= 24;
-	request += count;
+	request += CRUD_MAX_OBJECT_SIZE;
 	request <<= 4;
 	response = crud_bus_request(request, buf);
 	if (response & 0x1)
 		return (-1);
+	response >>= 4;
+	if ((response & 0xFFFFFF) < count)
+		return (response & 0xFFFFFF);
 	else
 		return (count);
 }

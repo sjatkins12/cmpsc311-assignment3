@@ -119,17 +119,17 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 	request <<= 4;
 	request += CRUD_READ;
 	request <<= 24;
-	request += count;
+	request += CRUD_MAX_OBJECT_SIZE;
 	request <<= 4;
 	response = crud_bus_request(request, buf);
 	tbuf = buf;
 	printf("%lu\n", response);
 	if (response & 0x1)
-		return (-1);
+		return (-1); 
 	response >>= 4;
 	printf("Val: %lu\n", (response & 0xFFFFFF));
 	while(i < count) {
-		if (!tbuf)
+		if (tbuf == NULL)
 			break ;
 		i++;
 		tbuf++;
@@ -236,6 +236,7 @@ int crudIOUnitTest(void) {
 		switch (cmd) {
 
 		case CIO_UNIT_TEST_READ: // read a random set of data
+			cio_utest_position -= count;
 			count = getRandomValue(0, cio_utest_length);
 			logMessage(LOG_INFO_LEVEL, "CRUD_IO_UNIT_TEST : read %d at position %d", count, cio_utest_position);
 			printf("Count: %d\n", count);

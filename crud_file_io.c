@@ -174,37 +174,15 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	int pos;
 	int i = 0;
 	int32_t length;
-	
+	printf("boobs\n");
 	tbuf = (char *) buf;
 	cbuf = (char *) buf;
-	// pos = 0;
-	// while (*(--tbuf)) {
-	// 	pos++;
-	// }
-	// printf("POS FOUND %d\n", pos);
-	// tbuf = malloc(CRUD_MAX_OBJECT_SIZE);
-	// request <<= 4;
-	// request += CRUD_READ;
-	// request <<= 24;
-	// request += CRUD_MAX_OBJECT_SIZE;
-	// request <<= 4;
-	// response = crud_bus_request(request, tbuf);
-	// length = ((response >> 4) & 0xFFFFFF);
-	// printf("length: %d\n", length);
+
 	while (i < count) {
 		tbuf[openFile.position] = cbuf[i];
 		i++;
 		openFile.position++;
 	}
-
-	// tbuf = (char *) buf;
-	// while (tbuf[i]) {
-	// 	i++;
-	// }
-	// if (length != i) {
-	// 	logMessage(LOG_ERROR_LEVEL, "CRUD_IO_UNIT_TEST : WRONG LENGTH %d ABORT %d", length, i);
-	// 	return (-1);
-	// }
 
 
 	if (openFile.position > openFile.length) {
@@ -268,16 +246,6 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 int32_t crud_seek(int16_t fd, uint32_t loc) {
 	openFile.position = loc;
 	return (0);
-	CrudResponse response;
-	CrudRequest request = openFile.OID;
-	void *tbuf;
-
-	tbuf = malloc(loc);
-	request = ((request << 4) + CRUD_READ) << 24;
-	request = (request + loc) << 4;
-	response = crud_bus_request(request, tbuf);
-
-
 }
 
 //

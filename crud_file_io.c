@@ -301,6 +301,7 @@ int crudIOUnitTest(void) {
 			logMessage(LOG_INFO_LEVEL, "CRUD_IO_UNIT_TEST : read %d at position %d", count, cio_utest_position);
 
 			bytes = crud_read(fh, tbuf, count);
+			printf("tits\n");
 			if (bytes == -1) {
 				logMessage(LOG_ERROR_LEVEL, "CRUD_IO_UNIT_TEST : Read failure.");
 				return(-1);

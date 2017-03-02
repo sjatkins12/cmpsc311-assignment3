@@ -231,7 +231,7 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 		response = crud_bus_request(request, cbuf);
 		// printf("CREATED Size:%d\n", openFile.position);
 		openFile.length = openFile.position;
-		openFile.OID = (response >> 32);
+		// openFile.OID = (response >> 32);
 		if (response & 0x1) 
 			return (-1);
 	}
@@ -240,16 +240,17 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 		for (i = 0; i < openFile.length; i++) {
 			cbuf[i] = tbuf[i];
 		}
-		request = openFile.OID;
-		request <<= 4;
-		request += CRUD_UPDATE;
-		request <<= 24;
-		request += openFile.length;
-		request <<= 4;
-		response = crud_bus_request(request, cbuf);
-		if (response & 0x1) 
-			return (-1);
 	}
+	request = openFile.OID;
+	request <<= 4;
+	request += CRUD_UPDATE;
+	request <<= 24;
+	request += openFile.length;
+	request <<= 4;
+	response = crud_bus_request(request, cbuf);
+	if (response & 0x1) 
+		return (-1);
+	
 	free(cbuf);
 	free(tbuf);
 	return (count);
@@ -399,7 +400,7 @@ int crudIOUnitTest(void) {
 				// Log the write, perform it
 				logMessage(LOG_INFO_LEVEL, "CRUD_IO_UNIT_TEST : write of %d bytes [%x]", count, ch);
 				memset(&cio_utest_buffer[cio_utest_position], ch, count);
-				printf("POS ACTUAL: %d\n", cio_utest_position);
+				// printf("POS ACTUAL: %d\n", cio_utest_position);
 				bytes = crud_write(fh, &cio_utest_buffer[cio_utest_position], count);
 				if (bytes!=count) {
 					logMessage(LOG_ERROR_LEVEL, "CRUD_IO_UNIT_TEST : write failed [%d].", count);

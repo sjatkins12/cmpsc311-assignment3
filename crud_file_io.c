@@ -205,10 +205,8 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 		request <<= 24;
 		request += CRUD_MAX_OBJECT_SIZE;
 		request <<= 4;
-		printf("DELETing\n");
 		response = crud_bus_request(request, buf);
-		printf("DELETED\n");
-		request = fd;
+		request = fd - 1;
 		request <<= 4;
 		request += CRUD_CREATE;
 		request <<= 24;
@@ -216,7 +214,7 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 		request <<= 4;
 
 		response = crud_bus_request(request, cbuf);
-		printf("CREATED Size:%d\n", pos + count);
+		printf("CREATED Size:%d\n", pos);
 		if (response & 0x1) 
 			return (-1);
 	}
@@ -225,7 +223,10 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 		for (i = 0; i < length; i++) {
 			cbuf[i] = tbuf[i];
 		}
-		request = ((fd << 4) + CRUD_UPDATE) << 24;
+		request = fd;
+		request <<= 4;
+		request += CRUD_UPDATE;
+		request <<= 24;
 		request += length;
 		request <<= 4;
 		response = crud_bus_request(request, cbuf);

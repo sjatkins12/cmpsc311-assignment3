@@ -301,7 +301,6 @@ int crudIOUnitTest(void) {
 			logMessage(LOG_INFO_LEVEL, "CRUD_IO_UNIT_TEST : read %d at position %d", count, cio_utest_position);
 
 			bytes = crud_read(fh, tbuf, count);
-			printf("tits\n");
 			if (bytes == -1) {
 				logMessage(LOG_ERROR_LEVEL, "CRUD_IO_UNIT_TEST : Read failure.");
 				return(-1);
@@ -318,6 +317,7 @@ int crudIOUnitTest(void) {
 				logMessage(LOG_ERROR_LEVEL, "CRUD_IO_UNIT_TEST : short/long read of [%d!=%d]", bytes, expected);
 				return(-1);
 			}
+			printf("tits\n");
 			if ( (bytes > 0) && (memcmp(&cio_utest_buffer[cio_utest_position], tbuf, bytes)) ) {
 
 				bufToString((unsigned char *)tbuf, bytes, (unsigned char *)lstr, 1024 );
@@ -329,7 +329,7 @@ int crudIOUnitTest(void) {
 				return(-1);
 			}
 			logMessage(LOG_INFO_LEVEL, "CRUD_IO_UNIT_TEST : read %d match", bytes);
-
+			
 
 			// update the position pointer
 			cio_utest_position += bytes;

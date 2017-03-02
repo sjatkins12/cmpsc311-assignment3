@@ -37,7 +37,12 @@ int32_t crud_seek(int16_t fd, uint32_t loc);
 
 int crudIOUnitTest(void);
 	// Perform a test of the CRUD IO implementation
-
+typedef struct{
+int32_t OID;
+int32_t length;
+int32_t position;
+int16_t fd;
+} CRUD_FILE;
 #endif
 
 

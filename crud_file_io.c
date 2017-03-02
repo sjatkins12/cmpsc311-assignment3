@@ -33,7 +33,7 @@ typedef enum {
 
 //
 // Implementation
-
+CRUD_FILE openFile;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -63,6 +63,10 @@ int16_t crud_open(char *path) {
 	request <<= 4; // Add ending zeros for flags & return bit
 	response = crud_bus_request(request, buff);
 	free(buff);
+	openFile.OID = response >> 32;
+	openFile.length = 1;
+	openFile.position = 0;
+	openFile.fd = openFile.OID;
 	if (response & 0x1) //Sucsessfull CRUD Request
 		return (-1); // Failure to create new object
 	else
@@ -114,30 +118,39 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 	CrudResponse response;
 	CrudRequest request = fd;
 	int i = 0;
+	int pos;
 	char *tbuf;
 	
+	tbuf = malloc(CRUD_MAX_OBJECT_SIZE);
 	request <<= 4;
 	request += CRUD_READ;
 	request <<= 24;
 	request += CRUD_MAX_OBJECT_SIZE;
 	request <<= 4;
-	response = crud_bus_request(request, buf);
-	tbuf = (char *) buf;
+	response = crud_bus_request(request, tbuf);
 	if (response & 0x1)
-		return (-1); 
-	response >>= 4;
-	while(i < count) {
-		if (!tbuf[i])
-			return (i);
-		i++;
+		return (-1);
+	buf = &tbuf[openFile.position];
+	free(tbuf);
+	if (openFile.position + count <= openFile.length) D{
+		openFile.position += count; 
+		return (count);
 	}
-	return (i);
-	// if ((response & 0xFFFFFF) < count)
-	// 	return (response & 0xFFFFFF);
-	// else {
-	// 	printf("Boobs\n");
-	// 	return (count);
+	openFile.position = openFile.length;
+	return (openFile.length - openFile.position);
+	// response >>= 4;
+	// while(i < count) {
+	// 	if (!tbuf[i])
+	// 		return (i);
+	// 	i++;
 	// }
+	// return (i);
+	// // if ((response & 0xFFFFFF) < count)
+	// // 	return (response & 0xFFFFFF);
+	// // else {
+	// // 	printf("Boobs\n");
+	// // 	return (count);
+	// // }
 	
 
 }
@@ -194,9 +207,9 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	// }
 
 
-	if (pos > length) {
-		cbuf = malloc(pos);
-		for (i = 0; i < pos; i++) {
+	if (openFile.position  + count > openFile.length) {
+		cbuf = malloc(openFile.position  + count);
+		for (i = 0; i < openFile.position  + count; i++) {
 			cbuf[i] = tbuf[i];
 		}
 		request = fd;
@@ -213,26 +226,28 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 		request <<= 4;
 		request += CRUD_CREATE;
 		request <<= 24;
-		request += pos;
+		request += (openFile.position + count);
 		request <<= 4;
-
 		response = crud_bus_request(request, cbuf);
-		printf("CREATED Size:%d\n", pos);
+		printf("CREATED Size:%d\n", openFile.position  + count);
+		openFile.length = openFile.position  + count;
+		openFile.position += count;
 		if (response & 0x1) 
 			return (-1);
 	}
 	else {
-		cbuf = malloc(length);
-		for (i = 0; i < length; i++) {
+		cbuf = malloc(openFile.length);
+		for (i = 0; i < openFile.length; i++) {
 			cbuf[i] = tbuf[i];
 		}
 		request = fd;
 		request <<= 4;
 		request += CRUD_UPDATE;
 		request <<= 24;
-		request += length;
+		request += openFile.length;
 		request <<= 4;
 		response = crud_bus_request(request, cbuf);
+		openFile.position += count;
 		if (response & 0x1) 
 			return (-1);
 	}
@@ -251,6 +266,7 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 // Outputs      : 0 if successful or -1 if failure
 
 int32_t crud_seek(int16_t fd, uint32_t loc) {
+	openFile.position = loc;
 	return (0);
 	CrudResponse response;
 	CrudRequest request = fd;

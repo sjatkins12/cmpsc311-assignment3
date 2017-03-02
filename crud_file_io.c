@@ -168,7 +168,7 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	while (*(--tbuf)) {
 		pos++;
 	}
-
+	printf("POS FOUND %d\n", pos);
 	tbuf = malloc(CRUD_MAX_OBJECT_SIZE);
 	request <<= 4;
 	request += CRUD_READ;
@@ -207,9 +207,13 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 		printf("DELETing\n");
 		response = crud_bus_request(request, buf);
 		printf("DELETED\n");
-		request = ((fd << 4) + CRUD_CREATE) << 24;
+		request = fd;
+		request <<= 4;
+		request += CRUD_CREATE;
+		request <<= 24;
 		request += pos + count;
 		request <<= 4;
+
 		response = crud_bus_request(request, cbuf);
 		printf("CREATED Size:%d\n", pos + count);
 		if (response & 0x1) 
@@ -375,6 +379,7 @@ int crudIOUnitTest(void) {
 				// Log the write, perform it
 				logMessage(LOG_INFO_LEVEL, "CRUD_IO_UNIT_TEST : write of %d bytes [%x]", count, ch);
 				memset(&cio_utest_buffer[cio_utest_position], ch, count);
+				printf("POS ACTUAL: %d\n", cio_utest_position);
 				bytes = crud_write(fh, &cio_utest_buffer[cio_utest_position], count);
 				if (bytes!=count) {
 					logMessage(LOG_ERROR_LEVEL, "CRUD_IO_UNIT_TEST : write failed [%d].", count);

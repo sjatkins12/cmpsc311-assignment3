@@ -157,38 +157,71 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	CrudResponse response;
 	CrudRequest request = fd;
 	char *tbuf;
+	char *cbuf;
+	int pos;
 	int i = 0;
+	int32_t length;
 	
+	tbuf = (char *) buf;
+	cbuf = (char *) buf;
+	pos = 0;
+	while (*(--tbuf)) {
+		pos++;
+	}
+
+	tbuf = malloc(CRUD_MAX_OBJECT_SIZE);
 	request <<= 4;
-	request += CRUD_UPDATE;
+	request += CRUD_READ;
 	request <<= 24;
 	request += CRUD_MAX_OBJECT_SIZE;
 	request <<= 4;
-	response = crud_bus_request(request, buf);
-	if (response & 0x1) {
-		request = ((fd << 4) + CRUD_DELETE) << 24;
-		request += CRUD_MAX_OBJECT_SIZE;
-		request <<= 4;
+	response = crud_bus_request(request, tbuf);
+	length = ((response >> 4) & 0xFFFFFF);
+	while (i < count) {
+		tbuf[pos] = cbuf[i];
+		i++;
+		pos++;
+	}
+
+	// tbuf = (char *) buf;
+	// while (tbuf[i]) {
+	// 	i++;
+	// }
+	// if (length != i) {
+	// 	logMessage(LOG_ERROR_LEVEL, "CRUD_IO_UNIT_TEST : WRONG LENGTH %d ABORT %d", length, i);
+	// 	return (-1);
+	// }
+
+
+	if (pos + count > length) {
+		cbuf = malloc(pos + count);
+		for (i = 0; i < pos + count; i++) {
+			cbuf[i] = tbuf[i];
+		}
+		request = ((fd << 4) + CRUD_DELETE) << 28;
 		response = crud_bus_request(request, buf);
-		response = (response >> 4) & 0xFFFFFF;
 		request = ((fd << 4) + CRUD_CREATE) << 24;
-		request += response;
+		request += pos + count;
 		request <<= 4;
-		response = crud_bus_request(request, buf);
+		response = crud_bus_request(request, cbuf);
 		if (response & 0x1) 
 			return (-1);
 	}
-	response >>= 4;
-	tbuf = (char *) buf;
-	if (response & 0x1)
-		return (-1); 
-	response >>= 4;
-	while(i < count) {
-		if (!tbuf[i])
-			return (i);
-		i++;
+	else {
+		cbuf = malloc(length);
+		for (i = 0; i < length; i++) {
+			cbuf[i] = tbuf[i];
+		}
+		request = ((fd << 4) + CRUD_UPDATE) << 24;
+		request += length;
+		request <<= 4;
+		response = crud_bus_request(request, cbuf);
+		if (response & 0x1) 
+			return (-1);
 	}
-	return (i);
+	free(cbuf);
+	free(tbuf);
+	return (count);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -201,15 +234,16 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 // Outputs      : 0 if successful or -1 if failure
 
 int32_t crud_seek(int16_t fd, uint32_t loc) {
+	return (0);
 	CrudResponse response;
 	CrudRequest request = fd;
 	void *tbuf;
 
-	tbuf = malloc(CRUD_MAX_OBJECT_SIZE);
+	tbuf = malloc(loc);
 	request = ((request << 4) + CRUD_READ) << 24;
-	request = (request + CRUD_MAX_OBJECT_SIZE) << 4;
+	request = (request + loc) << 4;
 	response = crud_bus_request(request, tbuf);
-	
+
 
 }
 
@@ -255,7 +289,7 @@ int crudIOUnitTest(void) {
 		if (cio_utest_length == 0) {
 			cmd = CIO_UNIT_TEST_WRITE;
 		} else {
-			cmd = getRandomValue(CIO_UNIT_TEST_READ, CIO_UNIT_TEST_WRITE);
+			cmd = getRandomValue(CIO_UNIT_TEST_READ, CIO_UNIT_TEST_SEEK);
 		}
 
 		// Execute the command

@@ -177,6 +177,7 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	request <<= 4;
 	response = crud_bus_request(request, tbuf);
 	length = ((response >> 4) & 0xFFFFFF);
+	printf("length: %d\n", length);
 	while (i < count) {
 		tbuf[pos] = cbuf[i];
 		i++;
@@ -193,9 +194,9 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	// }
 
 
-	if (pos + count > length) {
+	if (pos > length) {
 		cbuf = malloc(pos + count);
-		for (i = 0; i < pos + count; i++) {
+		for (i = 0; i < pos; i++) {
 			cbuf[i] = tbuf[i];
 		}
 		request = fd;
@@ -211,7 +212,7 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 		request <<= 4;
 		request += CRUD_CREATE;
 		request <<= 24;
-		request += pos + count;
+		request += pos;
 		request <<= 4;
 
 		response = crud_bus_request(request, cbuf);

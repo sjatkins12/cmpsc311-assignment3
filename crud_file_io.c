@@ -198,7 +198,12 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 		for (i = 0; i < pos + count; i++) {
 			cbuf[i] = tbuf[i];
 		}
-		request = ((fd << 4) + CRUD_DELETE) << 28;
+		request = fd;
+		request <<= 4;
+		request += CRUD_DELETE;
+		request <<= 24;
+		request += CRUD_MAX_OBJECT_SIZE;
+		request <<= 4;
 		printf("DELETing\n");
 		response = crud_bus_request(request, buf);
 		printf("DELETED\n");

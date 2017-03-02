@@ -59,7 +59,7 @@ int16_t crud_open(char *path) {
 	// 	path++;
 	// }
 	request <<= 24; //Move to correct position in array 
-	request += CIO_UNIT_TEST_MAX_WRITE_SIZE; // To assure one write before resizing
+	request += 1; // To assure one write before resizing
 	request <<= 4; // Add ending zeros for flags & return bit
 	response = crud_bus_request(request, buff);
 	free(buff);

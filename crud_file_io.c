@@ -200,10 +200,12 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 		}
 		request = ((fd << 4) + CRUD_DELETE) << 28;
 		response = crud_bus_request(request, buf);
+		printf("DELETED\n");
 		request = ((fd << 4) + CRUD_CREATE) << 24;
 		request += pos + count;
 		request <<= 4;
 		response = crud_bus_request(request, cbuf);
+		printf("CREATED Size:%d\n", pos + count);
 		if (response & 0x1) 
 			return (-1);
 	}

@@ -131,7 +131,7 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 	if (response & 0x1)
 		return (-1);
 	buf = &tbuf[openFile.position];
-	free(tbuf);
+
 	if (openFile.position + count <= openFile.length) {
 		openFile.position += count; 
 		return (count);

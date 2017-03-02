@@ -231,7 +231,7 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 		response = crud_bus_request(request, cbuf);
 		// printf("CREATED Size:%d\n", openFile.position);
 		openFile.length = openFile.position;
-		openFile.OID = (response >> 32)
+		openFile.OID = (response >> 32);
 		if (response & 0x1) 
 			return (-1);
 	}

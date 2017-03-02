@@ -85,7 +85,7 @@ int16_t crud_open(char *path) {
 
 int16_t crud_close(int16_t fh) {
 	CrudResponse response;
-	CrudRequest request = fh;
+	CrudRequest request = openFile.OID;
 	char *buff;
 
 	buff = malloc(CRUD_MAX_OBJECT_SIZE);
@@ -116,7 +116,7 @@ int16_t crud_close(int16_t fh) {
 
 int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 	CrudResponse response;
-	CrudRequest request = fd;
+	CrudRequest request = openFile.OID;
 	int i = 0;
 	int pos;
 	char *tbuf;
@@ -148,7 +148,7 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 	// // if ((response & 0xFFFFFF) < count)
 	// // 	return (response & 0xFFFFFF);
 	// // else {
-	// // 	printf("Boobs\n");
+		printf("Boobs\n");
 	// // 	return (count);
 	// // }
 	
@@ -168,7 +168,7 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 
 int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	CrudResponse response;
-	CrudRequest request = fd;
+	CrudRequest request = openFile.OID;
 	char *tbuf;
 	char *cbuf;
 	int pos;
@@ -177,24 +177,24 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	
 	tbuf = (char *) buf;
 	cbuf = (char *) buf;
-	pos = 0;
-	while (*(--tbuf)) {
-		pos++;
-	}
-	printf("POS FOUND %d\n", pos);
-	tbuf = malloc(CRUD_MAX_OBJECT_SIZE);
-	request <<= 4;
-	request += CRUD_READ;
-	request <<= 24;
-	request += CRUD_MAX_OBJECT_SIZE;
-	request <<= 4;
-	response = crud_bus_request(request, tbuf);
-	length = ((response >> 4) & 0xFFFFFF);
-	printf("length: %d\n", length);
+	// pos = 0;
+	// while (*(--tbuf)) {
+	// 	pos++;
+	// }
+	// printf("POS FOUND %d\n", pos);
+	// tbuf = malloc(CRUD_MAX_OBJECT_SIZE);
+	// request <<= 4;
+	// request += CRUD_READ;
+	// request <<= 24;
+	// request += CRUD_MAX_OBJECT_SIZE;
+	// request <<= 4;
+	// response = crud_bus_request(request, tbuf);
+	// length = ((response >> 4) & 0xFFFFFF);
+	// printf("length: %d\n", length);
 	while (i < count) {
-		tbuf[pos] = cbuf[i];
+		tbuf[openFile.position] = cbuf[i];
 		i++;
-		pos++;
+		openFile.position++;
 	}
 
 	// tbuf = (char *) buf;
@@ -207,31 +207,31 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	// }
 
 
-	if (openFile.position  + count > openFile.length) {
-		cbuf = malloc(openFile.position  + count);
-		for (i = 0; i < openFile.position  + count; i++) {
+	if (openFile.position > openFile.length) {
+		cbuf = malloc(openFile.position);
+		for (i = 0; i < openFile.position; i++) {
 			cbuf[i] = tbuf[i];
 		}
-		request = fd;
+		request = openFile.OID;
 		request <<= 4;
 		request += CRUD_DELETE;
 		request <<= 24;
 		request += CRUD_MAX_OBJECT_SIZE;
 		request <<= 4;
 		response = crud_bus_request(request, buf);
-		request = CRUD_INIT;
-		request <<= 28;
-		response = crud_bus_request(request, buf);
+		// request = CRUD_INIT;
+		// request <<= 28;
+		// response = crud_bus_request(request, buf);
 		request = 0;
 		request <<= 4;
 		request += CRUD_CREATE;
 		request <<= 24;
-		request += (openFile.position + count);
+		request += (openFile.position);
 		request <<= 4;
 		response = crud_bus_request(request, cbuf);
-		printf("CREATED Size:%d\n", openFile.position  + count);
-		openFile.length = openFile.position  + count;
-		openFile.position += count;
+		// printf("CREATED Size:%d\n", openFile.position);
+		openFile.length = openFile.position;
+		openFile.OID = (response >> 32)
 		if (response & 0x1) 
 			return (-1);
 	}
@@ -240,14 +240,13 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 		for (i = 0; i < openFile.length; i++) {
 			cbuf[i] = tbuf[i];
 		}
-		request = fd;
+		request = openFile.OID;
 		request <<= 4;
 		request += CRUD_UPDATE;
 		request <<= 24;
 		request += openFile.length;
 		request <<= 4;
 		response = crud_bus_request(request, cbuf);
-		openFile.position += count;
 		if (response & 0x1) 
 			return (-1);
 	}
@@ -269,7 +268,7 @@ int32_t crud_seek(int16_t fd, uint32_t loc) {
 	openFile.position = loc;
 	return (0);
 	CrudResponse response;
-	CrudRequest request = fd;
+	CrudRequest request = openFile.OID;
 	void *tbuf;
 
 	tbuf = malloc(loc);

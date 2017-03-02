@@ -195,7 +195,7 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 
 
 	if (pos > length) {
-		cbuf = malloc(pos + count);
+		cbuf = malloc(pos);
 		for (i = 0; i < pos; i++) {
 			cbuf[i] = tbuf[i];
 		}

@@ -199,6 +199,7 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 			cbuf[i] = tbuf[i];
 		}
 		request = ((fd << 4) + CRUD_DELETE) << 28;
+		printf("DELETing\n");
 		response = crud_bus_request(request, buf);
 		printf("DELETED\n");
 		request = ((fd << 4) + CRUD_CREATE) << 24;

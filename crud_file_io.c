@@ -121,11 +121,11 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 	request <<= 24;
 	request += CRUD_MAX_OBJECT_SIZE;
 	request <<= 4;
-	response = crud_bus_request(request, tbuf);
+	response = crud_bus_request(request, buf);
 	if (response & 0x1)
 		return (-1);
 	while (openFile.position < openFile.length && i < count){
-		buf[i] = tbuf[openFile.position];
+		// buf[i] = tbuf[openFile.position];
 		openFile.position += 1;
 		i++;
 	}

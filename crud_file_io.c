@@ -289,7 +289,7 @@ int crudIOUnitTest(void) {
 			}
 
 			// Compare to what we expected
-			printf("utest_position: %d\nutest_length: %d\n", cio_utest_position, cio_utest_length);
+			// printf("utest_position: %d\nutest_length: %d\n", cio_utest_position, cio_utest_length);
 			if (cio_utest_position+count > cio_utest_length) {
 				expected = cio_utest_length-cio_utest_position;
 			} else {

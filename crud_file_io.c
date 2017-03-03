@@ -1,11 +1,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-//  File           : crud_file_io.h
+//  File           : crud_file_io.c
 //  Description    : This is the implementation of the standardized IO functions
 //                   for used to access the CRUD storage system.
 //
-//  Author         : Patrick McDaniel
-//  Last Modified  : Sun Feb 05 19:38:42 EDT 2017
+//  Author         : Samuel Atkins
+//  Last Modified  : Fri Mar 03 19:38:42 EDT 2017
 //
 
 // Includes
@@ -285,7 +285,6 @@ int crudIOUnitTest(void) {
 			}
 
 			// Compare to what we expected
-			// printf("utest_position: %d\nutest_length: %d\n", cio_utest_position, cio_utest_length);
 			if (cio_utest_position+count > cio_utest_length) {
 				expected = cio_utest_length-cio_utest_position;
 			} else {
@@ -346,7 +345,6 @@ int crudIOUnitTest(void) {
 				// Log the write, perform it
 				logMessage(LOG_INFO_LEVEL, "CRUD_IO_UNIT_TEST : write of %d bytes [%x]", count, ch);
 				memset(&cio_utest_buffer[cio_utest_position], ch, count);
-				// printf("POS ACTUAL: %d\n", cio_utest_position);
 				bytes = crud_write(fh, &cio_utest_buffer[cio_utest_position], count);
 				if (bytes!=count) {
 					logMessage(LOG_ERROR_LEVEL, "CRUD_IO_UNIT_TEST : write failed [%d].", count);

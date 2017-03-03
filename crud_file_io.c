@@ -49,7 +49,7 @@ int16_t crud_open(char *path) {
 	char *buff;
 
 	buff = malloc(CRUD_MAX_OBJECT_SIZE);
-	response = crud_bus_request(request, buff);
+	response = crud_bus_request(request, NULL); // Initialize Object Store
 	request = CRUD_CREATE;
 
 	request <<= 24; //Move to correct position in array 
@@ -80,17 +80,12 @@ int16_t crud_open(char *path) {
 int16_t crud_close(int16_t fh) {
 	CrudResponse response;
 	CrudRequest request = openFile.OID;
-	char *buff;
 
-	buff = malloc(CRUD_MAX_OBJECT_SIZE);
 	request <<= 4;
 	request += CRUD_DELETE;
-	request <<= 24;
-	request += CRUD_MAX_OBJECT_SIZE;
-	request <<= 4;
-	response = crud_bus_request(request, buff);
-	free(buff);
-	if (response & 0x1) {
+	request <<= 28;
+	response = crud_bus_request(request, NULL);
+	if (response & 0x1) { // Check for good delete
 		return (-1);
 	}
 	else 
@@ -114,22 +109,23 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 	int i = 0;
 	char *tbuf;
 	
-	tbuf = malloc(openFile.length);
+	tbuf = malloc(openFile.length); //Size of object
 	request <<= 4;
 	request += CRUD_READ;
 	request <<= 24;
 	request += openFile.length;
 	request <<= 4;
-	response = crud_bus_request(request, tbuf);
-	if (response & 0x1) {
+	response = crud_bus_request(request, tbuf); // Read Entire Object
+	if (response & 0x1) { // Check for good read
 		free(tbuf);
 		return (-1);
 	}
+	// Count up to then end of the object
 	if (openFile.position + count > openFile.length)
 		count = openFile.length - openFile.position;
-	memcpy(buf, &tbuf[openFile.position], count);
+	memcpy(buf, &tbuf[openFile.position], count); // Copy Read data into buf
 	free(tbuf);
-	openFile.position += count;
+	openFile.position += count; // UPdate pos
 	return (count);
 }
 
@@ -226,7 +222,7 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 // Outputs      : 0 if successful or -1 if failure
 
 int32_t crud_seek(int16_t fd, uint32_t loc) {
-	openFile.position = loc;
+	openFile.position = loc; //Update Position 
 	return (0);
 }
 

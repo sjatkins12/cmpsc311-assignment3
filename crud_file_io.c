@@ -52,19 +52,13 @@ int16_t crud_open(char *path) {
 	response = crud_bus_request(request, buff);
 	request = CRUD_CREATE;
 
-	// // Add the path as first data in object
-	// while (path) {
-	// 	buff[i] = *path;
-	// 	i++;
-	// 	path++;
-	// }
 	request <<= 24; //Move to correct position in array 
-	request += 1; // To assure one write before resizing
+	request += 0;
 	request <<= 4; // Add ending zeros for flags & return bit
 	response = crud_bus_request(request, buff);
 	free(buff);
 	openFile.OID = response >> 32;
-	openFile.length = 1;
+	openFile.length = 0;
 	openFile.position = 0;
 	openFile.fd = openFile.OID;
 	if (response & 0x1) //Sucsessfull CRUD Request
@@ -329,7 +323,7 @@ int crudIOUnitTest(void) {
 				return(-1);
 			}
 			logMessage(LOG_INFO_LEVEL, "CRUD_IO_UNIT_TEST : read %d match", bytes);
-			
+
 
 			// update the position pointer
 			cio_utest_position += bytes;

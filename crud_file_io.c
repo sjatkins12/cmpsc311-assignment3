@@ -288,7 +288,7 @@ int crudIOUnitTest(void) {
 			}
 
 			// Compare to what we expected
-			// printf("utest_position: %d\nutest_length: %d\n", cio_utest_position, cio_utest_length);
+			printf("utest_position: %d\nutest_length: %d\n", cio_utest_position, cio_utest_length);
 			if (cio_utest_position+count > cio_utest_length) {
 				expected = cio_utest_length-cio_utest_position;
 			} else {
@@ -298,7 +298,6 @@ int crudIOUnitTest(void) {
 				logMessage(LOG_ERROR_LEVEL, "CRUD_IO_UNIT_TEST : short/long read of [%d!=%d]", bytes, expected);
 				return(-1);
 			}
-			printf("tits\n");
 			if ( (bytes > 0) && (memcmp(&cio_utest_buffer[cio_utest_position], tbuf, bytes)) ) {
 
 				bufToString((unsigned char *)tbuf, bytes, (unsigned char *)lstr, 1024 );
@@ -350,7 +349,6 @@ int crudIOUnitTest(void) {
 				// Log the write, perform it
 				logMessage(LOG_INFO_LEVEL, "CRUD_IO_UNIT_TEST : write of %d bytes [%x]", count, ch);
 				memset(&cio_utest_buffer[cio_utest_position], ch, count);
-				printf("butts\n");
 				// printf("POS ACTUAL: %d\n", cio_utest_position);
 				bytes = crud_write(fh, &cio_utest_buffer[cio_utest_position], count);
 				if (bytes!=count) {

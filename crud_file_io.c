@@ -112,39 +112,24 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 	CrudResponse response;
 	CrudRequest request = openFile.OID;
 	int i = 0;
-	int pos;
 	char *tbuf;
 	
-	tbuf = malloc(CRUD_MAX_OBJECT_SIZE);
+	tbuf = malloc(openFile.length);
 	request <<= 4;
 	request += CRUD_READ;
 	request <<= 24;
-	request += CRUD_MAX_OBJECT_SIZE;
+	request += openFile.length;
 	request <<= 4;
-	response = crud_bus_request(request, buf);
-	if (response & 0x1)
+	response = crud_bus_request(request, tbuf);
+	if (response & 0x1) {
+		free(tbuf);
 		return (-1);
-	while (openFile.position < openFile.length && i < count){
-		// buf[i] = tbuf[openFile.position];
-		openFile.position += 1;
-		i++;
 	}
-	return (i);
-	// response >>= 4;
-	// while(i < count) {
-	// 	if (!tbuf[i])
-	// 		return (i);
-	// 	i++;
-	// }
-	// return (i);
-	// // if ((response & 0xFFFFFF) < count)
-	// // 	return (response & 0xFFFFFF);
-	// // else {
-		printf("Boobs\n");
-	// // 	return (count);
-	// // }
-	
-
+	if (openFile.position + count > openFile.length)
+		count = openFile.length - openFile.position;
+	memcpy(buf, &tbuf[openFile.position], count);
+	free(tbuf);
+	return (count);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -163,67 +148,71 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 	CrudRequest request = openFile.OID;
 	char *tbuf;
 	char *cbuf;
-	int pos;
-	int i = 0;
-	int32_t length;
-	printf("boobs\n");
-	tbuf = (char *) buf;
-	cbuf = (char *) buf;
 
-	while (i < count) {
-		tbuf[openFile.position] = cbuf[i];
-		i++;
-		openFile.position++;
-	}
-
-
-	if (openFile.position > openFile.length) {
-		cbuf = malloc(openFile.position);
-		for (i = 0; i < openFile.position; i++) {
-			cbuf[i] = tbuf[i];
-		}
-		request = openFile.OID;
-		request <<= 4;
-		request += CRUD_DELETE;
-		request <<= 24;
-		request += CRUD_MAX_OBJECT_SIZE;
-		request <<= 4;
-		response = crud_bus_request(request, buf);
-		// request = CRUD_INIT;
-		// request <<= 28;
-		// response = crud_bus_request(request, buf);
-		request = 0;
-		request <<= 4;
-		request += CRUD_CREATE;
-		request <<= 24;
-		request += (openFile.position);
-		request <<= 4;
-		response = crud_bus_request(request, cbuf);
-		// printf("CREATED Size:%d\n", openFile.position);
-		openFile.length = openFile.position;
-		openFile.OID = (response >> 32);
-		if (response & 0x1) 
-			return (-1);
-	}
-	else {
-		cbuf = malloc(openFile.length);
-		for (i = 0; i < openFile.length; i++) {
-			cbuf[i] = tbuf[i];
-		}
-	}
+	// READ ALL OF OBJECT INTO CBUF
 	request = openFile.OID;
 	request <<= 4;
-	request += CRUD_UPDATE;
+	request += CRUD_READ;
 	request <<= 24;
 	request += openFile.length;
 	request <<= 4;
+	cbuf = malloc(openFile.length);
 	response = crud_bus_request(request, cbuf);
-	if (response & 0x1) 
+	if (response & 0x1) { //MAKE SURE GOOD READ
+		free(cbuf);
 		return (-1);
-	
-	free(cbuf);
-	free(tbuf);
-	return (count);
+	}
+	// Write to big for current Object
+	if (openFile.position + count > openFile.length) { 
+		// DELETE OLD OBJECT
+		request = openFile.OID;
+		request <<= 4;
+		request += CRUD_DELETE;
+		request <<= 28;
+		response = crud_bus_request(request, buf);
+		if (response & 0x1) { //MAKE SURE GOOD DELETE
+		free(cbuf);
+		return (-1);
+		}
+		tbuf = malloc(openFile.position + count);
+		// TBUF DATA FOR NEW OBJECT
+		memcpy(tbuf, cbuf, openFile.length);
+		free(cbuf);
+		memcpy(&tbuf[openFile.position], buf, count);
+		// CREATE NEW OBJECT
+		request += CRUD_CREATE;
+		request <<= 24;
+		request += openFile.position + count;
+		request <<= 4;
+		response = crud_bus_request(request, tbuf);
+		free(tbuf);
+		if (response & 0x1) { //MAKE SURE GOOD CREATE
+			
+			return (-1);
+		}
+		openFile.OID = (response >> 32); // Save new OID
+		openFile.length = openFile.position + count; //Update length
+		openFile.position += count; //Update pos
+		return (count);
+	}
+	else { //Object is large enough for write
+		memcpy(&cbuf[openFile.position], buf, count); //Copy new data into cbuf
+		//Update Object with new buf
+		request = openFile.OID;
+		request <<= 4;
+		request += CRUD_UPDATE;
+		request <<= 24;
+		request += openFile.length;
+		request <<= 4;
+		response = crud_bus_request(request, cbuf);
+		if (response & 0x1) { //MAKE SURE GOOD UPDATE
+			free(cbuf);
+			return (-1);
+		}
+		openFIle.position += count;
+		free(cbuf);
+		return (count);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -282,7 +271,7 @@ int crudIOUnitTest(void) {
 		if (cio_utest_length == 0) {
 			cmd = CIO_UNIT_TEST_WRITE;
 		} else {
-			cmd = getRandomValue(CIO_UNIT_TEST_READ, CIO_UNIT_TEST_WRITE);
+			cmd = getRandomValue(CIO_UNIT_TEST_READ, CIO_UNIT_TEST_SEEK);
 		}
 
 		// Execute the command

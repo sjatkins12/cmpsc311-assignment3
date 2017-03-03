@@ -129,6 +129,7 @@ int32_t crud_read(int16_t fd, void *buf, int32_t count) {
 		count = openFile.length - openFile.position;
 	memcpy(buf, &tbuf[openFile.position], count);
 	free(tbuf);
+	openFile.position += count;
 	return (count);
 }
 

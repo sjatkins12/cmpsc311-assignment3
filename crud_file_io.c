@@ -209,7 +209,7 @@ int32_t crud_write(int16_t fd, void *buf, int32_t count) {
 			free(cbuf);
 			return (-1);
 		}
-		openFIle.position += count;
+		openFile.position += count;
 		free(cbuf);
 		return (count);
 	}

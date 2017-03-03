@@ -282,7 +282,7 @@ int crudIOUnitTest(void) {
 		if (cio_utest_length == 0) {
 			cmd = CIO_UNIT_TEST_WRITE;
 		} else {
-			cmd = getRandomValue(CIO_UNIT_TEST_READ, CIO_UNIT_TEST_SEEK);
+			cmd = getRandomValue(CIO_UNIT_TEST_READ, CIO_UNIT_TEST_WRITE);
 		}
 
 		// Execute the command
